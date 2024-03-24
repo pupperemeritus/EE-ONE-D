@@ -3,6 +3,9 @@ import torch.nn.functional as F
 import torch
 from typing import List, Tuple
 from nltk.tokenize import sent_tokenize
+import logging
+
+logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 
 
 class SemanticSearch:
@@ -10,7 +13,7 @@ class SemanticSearch:
         self, model: str, tokenizer: str, document: List[str], input_text: bool = True
     ):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.max_seq_length = 512
+        self.max_seq_length = 1024
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model, trust_remote_code=True
         ).to(self.device)
@@ -24,17 +27,16 @@ class SemanticSearch:
 
     def find_semantic_neighbors(self, query: str, k: int) -> List[Tuple[str, float]]:
         query_embedding = self._get_embedding(query)
-        document_embeddings = [
-            self._get_embedding(text).to(self.device) for text in self.document
-        ]
+        semantic_neighbors = []
 
-        similarities = [
-            F.cosine_similarity(query_embedding, corpus_embedding).item()
-            for corpus_embedding in document_embeddings
-        ]
-        semantic_neighbors = sorted(
-            zip(self.document, similarities), key=lambda x: x[1], reverse=True
-        )[:k]
+        for text in self.document:
+            corpus_embedding = self._get_embedding(text).to(self.device)
+            similarity = F.cosine_similarity(query_embedding, corpus_embedding).item()
+            semantic_neighbors.append((text, similarity))
+            if len(semantic_neighbors) == k:
+                break
+
+        semantic_neighbors.sort(key=lambda x: x[1], reverse=True)
 
         return semantic_neighbors
 
@@ -52,7 +54,7 @@ class SemanticSearch:
 
 
 if __name__ == "__main__":
-    model_name = "togethercomputer/m2-bert-80M-2k-retrieval"
+    model_name = "togethercomputer/m2-bert-80M-32k-retrieval"
     tokenizer_name = "bert-base-uncased"
     document = [
         "Every morning, I make a cup of coffee to start my day.",
