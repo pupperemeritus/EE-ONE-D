@@ -1,0 +1,10 @@
+sentence-transformers
+pytorch
+tqdm
+boto3
+requests
+regex
+sentencepiece
+sacremoses
+torchvision
+torchaudio
