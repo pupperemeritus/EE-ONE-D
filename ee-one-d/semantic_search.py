@@ -2,10 +2,13 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch.nn.functional as F
 import torch
 from typing import List, Tuple
+from nltk.tokenize import sent_tokenize
 
 
 class SemanticSearch:
-    def __init__(self, model: str, tokenizer: str, document: List[str]):
+    def __init__(
+        self, model: str, tokenizer: str, document: List[str], input_text: bool = True
+    ):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.max_seq_length = 512
         self.model = AutoModelForSequenceClassification.from_pretrained(
@@ -14,7 +17,10 @@ class SemanticSearch:
         self.tokenizer = AutoTokenizer.from_pretrained(
             tokenizer, trust_remote_code=True, model_max_length=self.max_seq_length
         )
-        self.document = document
+        if input_text:
+            self.document = sent_tokenize(document)
+        else:
+            self.document = document
 
     def find_semantic_neighbors(self, query: str, k: int) -> List[Tuple[str, float]]:
         query_embedding = self._get_embedding(query)
@@ -56,11 +62,13 @@ if __name__ == "__main__":
         "I enjoy playing video games in my free time.",
     ]
 
-    semantic_search = SemanticSearch(model_name, tokenizer_name, document)
+    semantic_search = SemanticSearch(
+        model_name, tokenizer_name, document, input_text=False
+    )
 
     # Test the find_semantic_neighbors method
     query = "tea"
-    k = 2
+    k = 4
     semantic_neighbors = semantic_search.find_semantic_neighbors(query, k)
 
     for neighbor, similarity in semantic_neighbors:
