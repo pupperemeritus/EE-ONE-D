@@ -1,5 +1,5 @@
 sentence-transformers
-pytorch
+torch
 tqdm
 boto3
 requests
@@ -8,3 +8,4 @@ sentencepiece
 sacremoses
 torchvision
 torchaudio
+nltk
