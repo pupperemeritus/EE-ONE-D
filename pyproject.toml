@@ -1,0 +1,21 @@
+# write me a pyproject.toml template
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "my_package"
+version = "0.0.1"
+description = "A short description of the project."
+readme = "README.md"
+authors = [{ name = "s", email = "mP7eI@example.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+  "License :: OSI Approved :: GNU General Public License version 3",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+]
+keywords = []
+dependencies = []
+requires-python = ">=3.10"
