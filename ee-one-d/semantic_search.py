@@ -1,7 +1,7 @@
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch.nn.functional as F
 import torch
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from nltk.tokenize import sent_tokenize
 import logging
 
@@ -10,10 +10,20 @@ logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 
 class SemanticSearch:
     def __init__(
-        self, model: str, tokenizer: str, document: List[str], input_text: bool = True
+        self, model: str, tokenizer: str, document: List[str],
+         input_text: bool = True, max_seq_length: Optional[int]=1024
     ):
+        """
+        Initialize the class with the provided model name, tokenizer name, and document.
+        
+        Parameters:
+            model (str): The name of the model to be loaded.
+            tokenizer (str): The name of the tokenizer to be loaded.
+            document (List[str]): A list of strings representing the document.
+            input_text (bool, optional): A flag indicating whether the input is text or not. Defaults to True.
+            max_seq_length (int, optional): The maximum sequence length. Defaults to 1024.
+        """
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.max_seq_length = 1024
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model, trust_remote_code=True
         ).to(self.device)
@@ -26,6 +36,16 @@ class SemanticSearch:
             self.document = document
 
     def find_semantic_neighbors(self, query: str, k: int) -> List[Tuple[str, float]]:
+        """
+        Find semantic neighbors for a given query in the document.
+        
+        Parameters:
+            query (str): The query string for which to find semantic neighbors.
+            k (int): The number of semantic neighbors to retrieve.
+        
+        Returns:
+            List[Tuple[str, float]]: A list of tuples containing the text of the semantic neighbor and its similarity score.
+        """
         query_embedding = self._get_embedding(query)
         semantic_neighbors = []
 
@@ -41,6 +61,15 @@ class SemanticSearch:
         return semantic_neighbors
 
     def _get_embedding(self, text: str) -> torch.Tensor:
+        """
+        Get the embedding for the input text using the tokenizer and model.
+        
+        Args:
+            text (str): The input text for which the embedding needs to be generated.
+        
+        Returns:
+            torch.Tensor: The embedding for the input text.
+        """
         input_ids = self.tokenizer(
             [text],
             return_tensors="pt",
