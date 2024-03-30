@@ -1,35 +1,46 @@
+import logging
+from typing import List
+
+import nltk
 import numpy as np
 import torch
-import nltk
-from typing import List
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoModel, AutoTokenizer
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 class TypographicalNeighbors:
-    def __init__(self, input_string: str, metric: str = "edit_distance"):
+    def __init__(self, input_string: str, metric: str = "edit_distance", model_name:str ="bert-base-uncased"):
         """
         Initializes an instance of the class with the given input string and metric.
 
         Parameters:
             input_string (str): The input string to be used for typographical search.
             metric (str, optional): The metric to be used for calculating the distance between strings. Defaults to "edit_distance".
-
+            model_name (str, optional): The name of the pre-trained model to be used. Defaults to "bert-base-uncased".
         Returns:
             None
         """
+        logger.debug("Initializing TypographicalNeighbors class")
+        
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.metric = nltk.edit_distance
+        
         self.input_string = input_string
         self.typographical_neighbors = []
-
-        self.model_name = 'bert-base-uncased'
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.model = AutoModel.from_pretrained(self.model_name)
+        
+        self.model_name = model_name
+        
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name).to(self.device)
+        self.model = AutoModel.from_pretrained(self.model_name).to(self.device)
 
     def tokenize_inputs(self):
         """
         Tokenizes the input string using the tokenizer, generates the input representation using the model, and returns the tokenized inputs and the input representation.
         """
+        logger.debug("Tokenizing inputs")
         tokenized_inputs = self.tokenizer.encode_plus(self.input_string, return_tensors="pt")
-        input_representation = self.model(**tokenized_inputs).last_hidden_state.mean(dim=1)
+        input_representation = self.model(**tokenized_inputs).to(self.device).last_hidden_state.mean(dim=1)
         return tokenized_inputs, input_representation
 
     def get_neighbors(self):
@@ -44,13 +55,15 @@ class TypographicalNeighbors:
                 self.typographical_neighbors.append(neighbor)
         return self.typographical_neighbors
 
-    def encode_neighbors(self):
+    def encode_neighbors(self)-> List[np.ndarray]:
         """
         Encodes the typographical neighbors of the current instance using a tokenizer and a model.
 
         Returns:
             encoded_neighbors (list): A list of encoded neighbors, where each neighbor is represented as a numpy array.
         """
+        logger.debug("Encoding neighbors")
+
         encoded_neighbors = []
         for neighbor in self.typographical_neighbors:
             tokenized_neighbor = self.tokenizer.encode_plus(neighbor, return_tensors="pt")
@@ -58,15 +71,20 @@ class TypographicalNeighbors:
                 output = self.model(**tokenized_neighbor)
             encoded_neighbor = output.last_hidden_state.mean(dim=1).squeeze().detach().numpy()
             encoded_neighbors.append(encoded_neighbor)
+        
+        logger.debug("Encoded neighbors")
+
         return encoded_neighbors
 
-    def get_similar_neighbors(self):
+    def get_similar_neighbors(self)-> List[str]:
         """
         Calculates the cosine similarity between the input representation and the encoded neighbors.
         
         Returns:
             sorted_neighbors (list): A list of neighbors sorted in descending order of similarity.
         """
+        logger.debug("Calculating similar neighbours")
+
         tokenized_inputs, input_representation = self.tokenize_inputs()
         encoded_neighbors = self.encode_neighbors()
         similarities = []
@@ -75,9 +93,12 @@ class TypographicalNeighbors:
             cosine_similarity = similarity_score / (np.linalg.norm(input_representation.detach().numpy()) * np.linalg.norm(neighbor_embedding))
             similarities.append(cosine_similarity)
         sorted_neighbors = [x for _, x in sorted(zip(similarities, self.typographical_neighbors), reverse=True)]
+
+        logger.debug("Calculated similar neighbours")
+
         return sorted_neighbors
 
-    def display_typogrphical_neighbors(self, n: int = 10):
+    def find_typographical_neighbors(self, n: int = 10) -> List[str]:
         """
         Display the typographical neighbors of the input string up to a specified number.
 
@@ -90,12 +111,13 @@ class TypographicalNeighbors:
         sorted_neighbors = self.get_similar_neighbors()
         typographical_neighbors_list = sorted_neighbors[:n]
 
-        print(f"Input string: {self.input_string}")
-        print(f"Typographical neighbors: {typographical_neighbors_list}")
+        return typographical_neighbors_list
+    
+    
 
 if __name__=="__main__":
     # Example usage:
     input_string = "dogs"
     tn = TypographicalNeighbors(input_string)
     tn.get_neighbors()
-    tn.display_typogrphical_neighbors()
+    tn.find_typographical_neighbors()
