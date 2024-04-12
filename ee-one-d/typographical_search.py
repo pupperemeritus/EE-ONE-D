@@ -47,8 +47,10 @@ class TypographicalNeighbors:
         """
         Retrieves the typographical neighbors of the input string by iterating through the words in the NLTK corpus and checking for words that have a metric distance of 1 from the input string.
 
-        Returns:
-            list: A list of typographical neighbors of the input string.
+        Returns
+        -------
+        list
+            A list of typographical neighbors of the input string.
         """
         for neighbor in nltk.corpus.words.words():
             if self.metric(neighbor, self.input_string) == 1:
@@ -79,9 +81,11 @@ class TypographicalNeighbors:
     def get_similar_neighbors(self)-> List[str]:
         """
         Calculates the cosine similarity between the input representation and the encoded neighbors.
-        
-        Returns:
-            sorted_neighbors (list): A list of neighbors sorted in descending order of similarity.
+
+        Returns
+        -------
+        sorted_neighbors : list
+            A list of neighbors sorted in descending order of similarity.
         """
         logger.debug("Calculating similar neighbours")
 

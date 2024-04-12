@@ -1,4 +1,28 @@
+from typing import List, Optional, Tuple
+
+
 def sellers_dist(str1, str2, cost_sub=0.5, cost_ins=1, cost_del=1):
+    """
+    A function to calculate the Levenshtein distance between two strings.
+    
+    Parameters
+    ----------
+    str1 : str
+        The first input string
+    str2 : str
+        The second input string
+    cost_sub : float, optional
+        The cost of substitution (default is 0.5)
+    cost_ins : float, optional
+        The cost of insertion (default is 1)
+    cost_del : float, optional
+        The cost of deletion (default is 1)
+    
+    Returns
+    -------
+    float
+        The calculated Levenshtein distance
+    """
     prev_row = list(range(len(str2) + 1))
         
     min_distance = float('inf')
@@ -17,7 +41,28 @@ def sellers_dist(str1, str2, cost_sub=0.5, cost_ins=1, cost_del=1):
     return float(min_distance)
 
 
-def find_nearest_neighbors(query_substring, string, distance_threshold=2, n=4, length_threshold=0):
+def find_nearest_neighbors(query_substring: str, string: str, distance_threshold: int = 2, n: int = 4, length_threshold: int = 0) -> List[Tuple[str, float]]:
+    """
+    Find the nearest neighbors of a query substring within a given string.
+
+    Parameters
+    ----------
+    query_substring : str
+        The query substring to find nearest neighbors for.
+    string : str
+        The string to search for nearest neighbors within.
+    distance_threshold : int, optional
+        The maximum allowable distance between query substring and its neighbors. Defaults to 2.
+    n : int, optional
+        The maximum number of nearest neighbors to return. Defaults to 4.
+    length_threshold : int, optional
+        The maximum allowable difference in length between query substring and its neighbors. Defaults to 0.
+
+    Returns
+    -------
+    list of tuple of str and float
+        A list of tuples containing the nearest neighbors and their distances, sorted by distance.
+    """
     nearest_neighbors = []
     
        
@@ -38,6 +83,7 @@ def find_nearest_neighbors(query_substring, string, distance_threshold=2, n=4, l
         return nearest_neighbors[:n]
     else:
         return nearest_neighbors
+
 
 
 
