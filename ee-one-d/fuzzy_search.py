@@ -17,7 +17,6 @@ def sellers_dist(str1, str2, cost_sub=0.5, cost_ins=1, cost_del=1):
     return float(min_distance)
 
 
-    nearest_neighbors = []
 def find_nearest_neighbors(query_substring, string, distance_threshold=2, n=4, length_threshold=0):
     nearest_neighbors = []
     
