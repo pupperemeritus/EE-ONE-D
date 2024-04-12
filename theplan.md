@@ -30,3 +30,11 @@ Input : Words, Phrases or Sentences
 Responsibility : Guru, Rishikesh
 
 Already implemented.
+
+# Attention Module
+
+Input:Sentances
+
+Responsibility:Rishikesh
+
+Output: Top N important words, weighted vector sum(Attentions of each word and Vector embeddings of each word)
