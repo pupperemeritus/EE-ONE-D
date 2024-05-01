@@ -26,7 +26,7 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 class TypographicalNeighbors:
-  """
+    """
     A class for finding typographical neighbors of a given input string.
 
     Attributes:
