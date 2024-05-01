@@ -1,6 +1,6 @@
 """
 Module: typographical_neighbors.py
-Author: Simhadri Adhit,Akil krisna,Sri Guru Datta Pisupati,M Rishikesh
+Author: Akil krisna, M Rishikesh, Sri Guru Datta Pisupati,Simhadri Adhit
 
 This module provides a class, TypographicalNeighbors, for finding typographical neighbors of a given input string using pre-trained language models and edit distance as the default metric.
 
