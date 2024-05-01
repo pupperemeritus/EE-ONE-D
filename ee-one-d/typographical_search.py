@@ -30,25 +30,36 @@ class TypographicalNeighbors:
     A class for finding typographical neighbors of a given input string.
 
     Attributes:
-        input_string (str): The input string to be used for typographical search.
-        metric (str): The metric used for calculating the distance between strings.
-        model_name (str): The name of the pre-trained model to be used.
-        device (torch.device): The device (CPU or CUDA) used for computations.
-        tokenizer (AutoTokenizer): The tokenizer for tokenizing input strings.
-        model (AutoModel): The pre-trained model for encoding input strings.
-        typographical_neighbors (List[str]): A list to store typographical neighbors.
+        input_string : str
+            The input string to be used for typographical search.
+        metric : str
+            The metric used for calculating the distance between strings.
+        model_name : str
+            The name of the pre-trained model to be used.
+        device : torch.device
+            The device (CPU or CUDA) used for computations.
+        tokenizer : AutoTokenizer
+            The tokenizer for tokenizing input strings.
+        model : AutoModel
+            The pre-trained model for encoding input strings.
+        typographical_neighbors : List[str]
+            A list to store typographical neighbors.
     """
 
     def __init__(self, input_string: str, metric: str = "edit_distance", model_name:str ="bert-base-uncased"):
         """
         Initializes an instance of the class with the given input string, metric, and model name.
 
-        Parameters:
-            input_string (str): The input string to be used for typographical search.
-            metric (str, optional): The metric to be used for calculating the distance between strings.
-                Defaults to "edit_distance".
-            model_name (str, optional): The name of the pre-trained model to be used.
-                Defaults to "bert-base-uncased".
+        Parameters
+        ----------
+        input_string : str
+            The input string to be used for typographical search.
+        metric : str, optional
+            The metric to be used for calculating the distance between strings.
+            Defaults to "edit_distance".
+        model_name : str, optional
+            The name of the pre-trained model to be used.
+            Defaults to "bert-base-uncased".
         """
         logger.debug("Initializing TypographicalNeighbors class")
         
@@ -78,8 +89,10 @@ class TypographicalNeighbors:
         Retrieves the typographical neighbors of the input string by iterating through the words in the NLTK corpus
         and checking for words that have a metric distance of 1 from the input string.
 
-        Returns:
-            typographical_neighbors (List[str]): A list of typographical neighbors of the input string.
+        Returns
+        -------
+        typographical_neighbors : List[str]
+            A list of typographical neighbors of the input string.
         """
         for neighbor in nltk.corpus.words.words():
             if self.metric(neighbor, self.input_string) == 1:
@@ -90,8 +103,10 @@ class TypographicalNeighbors:
         """
         Encodes the typographical neighbors of the current instance using a tokenizer and a model.
 
-        Returns:
-            encoded_neighbors (List[np.ndarray]): A list of encoded neighbors, where each neighbor is represented as a numpy array.
+        Returns
+        -------
+        encoded_neighbors : List[np.ndarray]
+            A list of encoded neighbors, where each neighbor is represented as a numpy array.
         """
         logger.debug("Encoding neighbors")
 
@@ -111,8 +126,10 @@ class TypographicalNeighbors:
         """
         Calculates the cosine similarity between the input representation and the encoded neighbors.
 
-        Returns:
-            sorted_neighbors (List[str]): A list of neighbors sorted in descending order of similarity.
+        Returns
+        -------
+        sorted_neighbors : List[str]
+            A list of neighbors sorted in descending order of similarity.
         """
         logger.debug("Calculating similar neighbours")
 
@@ -133,11 +150,15 @@ class TypographicalNeighbors:
         """
         Display the typographical neighbors of the input string up to a specified number.
 
-        Parameters:
-            n (int): The number of typographical neighbors to display.
+        Parameters
+        ----------
+        n : int
+            The number of typographical neighbors to display.
 
-        Returns:
-            typographical_neighbors_list (List[str]): A list of typographical neighbors.
+        Returns
+        -------
+        typographical_neighbors_list : List[str]
+            A list of typographical neighbors.
         """
         sorted_neighbors = self.get_similar_neighbors()
         typographical_neighbors_list = sorted_neighbors[:n]
