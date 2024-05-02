@@ -10,13 +10,13 @@
 
 ## What are we doing?
 
-### Packages Used:
+### Packages Overview
 - `logging` (provides logging functionality for debugging.)
 - `torch`
 - `nltk`
 - `transformers`
 
-### Input:
+### Input
 
 - The `SemanticSearch` class takes several inputs:
   - `model`: The name of the model to be loaded.
@@ -31,13 +31,13 @@
 ).to(self.device)
 `
 
-### Output:
+### Output
 
 - The `find_semantic_neighbors` method returns a list of tuples. Each tuple contains the text of a semantic neighbor and its similarity score.
 - The `_get_embedding` method returns the embedding (a numerical representation) for the input text.
 
 
-### A Brief Overview of the Functions Used:
+### A Brief Overview of the Functions Used
 
 - **SemanticSearch initialization:**
   - Initializes the class with the provided model, tokenizer, and document.
@@ -52,7 +52,7 @@
   - Tokenizes the input text.
   - Generates the embedding for the input text using the loaded model.
 
-### Return Types of Functions:
+### Return Types of Functions
 
 - **SemanticSearch initialization (`__init__` method):**
   - `None`
@@ -63,7 +63,7 @@
 - **_get_embedding (`_get_embedding` method):**
   - Returns: `torch.Tensor` - The embedding for the input text.
  
-## How It Adds Together:
+## How It Adds Together
 
 ### Initialization `(__init__ method)`:
 Initializes the SemanticSearch object with the provided model, tokenizer, and document.
