@@ -37,7 +37,7 @@
 - The `_get_embedding` method returns the embedding (a numerical representation) for the input text.
 
 
-### Functions and their Actions:
+### A Brief Overview of the Functions Used:
 
 - **SemanticSearch initialization:**
   - Initializes the class with the provided model, tokenizer, and document.
@@ -52,7 +52,7 @@
   - Tokenizes the input text.
   - Generates the embedding for the input text using the loaded model.
 
-### Return Types:
+### Return Types of Functions:
 
 - **SemanticSearch initialization (`__init__` method):**
   - `None`
