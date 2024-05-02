@@ -1,7 +1,9 @@
 ## A Laymans Description
 This Typographical Python module helps find words similar to a given input word. It works by comparing the input word with a list of words from a large corpus. It uses advanced language models, in this case, *bert-base-uncased* for tokenisation and encoding of text and to identify words that have a resemblance to the input word. It then returns a list of similar words, sorted by how closely they match the input word.
 
-## Packages Overview
+## What are we doing?
+
+### Packages Overview
 - **logging** (used for logging messages to provide insights into the execution flow and debugging.)
 - **typing** (provides support for defining type hints in Python code.)
 - **nltk**
@@ -9,13 +11,13 @@ This Typographical Python module helps find words similar to a given input word.
 - **torch**
 - **transformers** (Hugging Face's transformers library)
 
-## Input
+### Input
 
 input_string `(str)`: The input string for which typographical neighbors are to be found.\
 metric `(str, optional)`: The metric used to calculate the distance between strings and it's set to *edit_distance* by default.\
 model_name `(str, optional)`: The name of the pre-trained language model to be used and it's set to *bert-base-uncased* by default.
 
-## Output
+### Output
 
 typographical_neighbors_list `(List[str])`: A list of typographical neighbors of the input string, sorted by similarity.
 
