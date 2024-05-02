@@ -3,10 +3,10 @@
 - The goal was to utilize a transformer's encoder block to obtain a word's **attention weights**, a key concept used by them to gain a deeper contextual understanding and understand the role that each word is playing in a sentence.
 
 - ## Details: 
-	**Input type**: `a string of words/ a single word`
-	**Output type**: `A list of numbers (words)/ a single number, representing the attention weights.`
-	**Transformer used**: `bert-base-uncased`
-	**Requirements**: `nltk, torch, transformers(huggingface)`
+	1. **Input type**: `a string of words/ a single word`
+	2. **Output type**: `A list of numbers (words)/ a single number, representing the attention weights.`
+	3. **Transformer used**: `bert-base-uncased`
+	4. **Requirements**: `nltk, torch, transformers(huggingface)`
 	
 -  The module has the following functions:
 	`__init__`: initialize the transformer's model and tokenizer, `WoroNetLemmatizer` and `word_tokenize()`
