@@ -28,7 +28,7 @@ class AttentionModel(torch.nn.Module):
 
         self.importance_scores = self.get_weights()
     
-    def preprocess_input(self):
+    def preprocess_input(c):
         filtered_words = [self.lemmatizer.lemmatize(word) for word in self.tokens if word not in self.stop_words]
         filtered_sentence = ' '.join(filtered_words)
         
