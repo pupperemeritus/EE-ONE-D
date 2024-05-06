@@ -1,3 +1,20 @@
+"""
+Module: semantic_search.py
+Author: Akil Krishna, M Rishikesh, Sri Guru Datta Pisupati,Simhadri Adhit
+
+
+This module provides a class, SemanticSearch, for finding semantic neighbors of a given input string using pre-trained language models as the default metric.
+
+Dependencies:
+- nltk
+- numpy
+- torch
+- transformers
+
+Usage:
+1. Initialize an instance of SemanticSearch with an input string.
+2. Call the find_semantic_neighbors method to retrieve and display semantic neighbors.
+"""
 import logging
 from typing import List, Optional, Tuple
 
