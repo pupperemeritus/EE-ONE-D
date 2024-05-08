@@ -15,8 +15,9 @@ Usage:
 1. Initialize an instance of SemanticSearch with an input string.
 2. Call the find_semantic_neighbors method to retrieve and display semantic neighbors.
 """
+
 import logging
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import torch
 import torch.nn.functional as F
@@ -24,13 +25,37 @@ from nltk.tokenize import sent_tokenize
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
+
 class SemanticSearch:
+    """
+    Class for finding semantic neighbors of a given input string using pre-trained language models as the default metric.
+
+    Attributes:
+        model : AutoModelForSequenceClassification
+            The pre-trained model for semantic search.
+        tokenizer : string
+            The tokenizer for tokenizing input strings.
+        model_name : string
+            The name of the pre-trained model to be used.
+        max_seq_length : int
+            The maximum sequence length.
+        document : List[str]
+            A list of strings representing the document.
+        input_text : bool
+            A flag indicating whether the input is text or not.
+    """
+
     def __init__(
-        self, model: str="togethercomputer/m2-bert-80M-32k-retrieval", tokenizer: str="bert-base-uncased", document: List[str]=[],
-         input_text: bool = True, max_seq_length: Optional[int]=1024
+        self,
+        model: str = "togethercomputer/m2-bert-80M-32k-retrieval",
+        tokenizer: str = "bert-base-uncased",
+        document: Union[List[str], str] = [],
+        max_seq_length: Optional[int] = 1024,
     ):
         """
         Initialize the class with the provided model name, tokenizer name, and document.
@@ -43,8 +68,6 @@ class SemanticSearch:
             The name of the tokenizer to be loaded.
         document : List[str]
             A list of strings representing the document.
-        input_text : bool, optional
-            A flag indicating whether the input is text or not. Defaults to True.
         max_seq_length : int, optional
             The maximum sequence length. Defaults to 1024.
         """
@@ -61,13 +84,16 @@ class SemanticSearch:
             )
         except:
             logging.error("Failed to load tokenizer, too large of a sequence length.")
-        if input_text:
+        if isinstance(document, str):
             self.document = sent_tokenize(document)
-        else:
+        elif isinstance(document, list):
             self.document = document
+        elif isinstance(document, list(list)):
+            self.document = [sent_tokenize(" ".join(sentence)) for sentence in document]
 
-        logger.debug("SemanticSearch initialized with model: %s, tokenizer: %s", model, tokenizer)
-
+        logger.debug(
+            "SemanticSearch initialized with model: %s, tokenizer: %s", model, tokenizer
+        )
 
     def find_semantic_neighbors(self, query: str, k: int) -> List[Tuple[str, float]]:
         """
@@ -109,7 +135,7 @@ class SemanticSearch:
         ----------
         text : str
             The input text for which the embedding needs to be generated.
-            
+
         Returns
         -------
         torch.Tensor
@@ -136,7 +162,6 @@ class SemanticSearch:
         return outputs["sentence_embedding"]
 
 
-
 if __name__ == "__main__":
     model_name = "togethercomputer/m2-bert-80M-32k-retrieval"
     tokenizer_name = "bert-base-uncased"
@@ -149,7 +174,7 @@ if __name__ == "__main__":
     ]
 
     semantic_search = SemanticSearch(
-        model_name, tokenizer_name, document, input_text=False
+        model=model_name, tokenizer=tokenizer_name, document=document
     )
 
     # Test the find_semantic_neighbors method
@@ -159,5 +184,4 @@ if __name__ == "__main__":
 
     for neighbor, similarity in semantic_neighbors:
         print(f"Neighbor: {neighbor}")
-        print(f"Similarity: {similarity}")
-        print()
+        print(f"Similarity: {similarity}\n")
