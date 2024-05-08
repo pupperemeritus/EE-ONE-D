@@ -1,9 +1,25 @@
+"""
+Module: attention.py
+Author: Akil Krishna, M Rishikesh, Sri Guru Datta Pisupati,Simhadri Adhit
+
+This module provides a class, AttentionModel, for finding the most important tokens in a given input string using pre-trained language models as the default metric.
+
+Dependencies:
+- nltk
+- torch
+- transformers
+
+Usage:
+1. Initialize an instance of AttentionModel with an input string.
+2. Call the get_weights method to retrieve and display the importance scores.
+"""
 import nltk
 import torch
-from transformers import BertModel, BertTokenizer
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+from transformers import BertModel, BertTokenizer
+
 
 class AttentionModel(torch.nn.Module):
     def __init__(self, input_string, model_name="bert-base-uncased"):
@@ -28,7 +44,7 @@ class AttentionModel(torch.nn.Module):
 
         self.importance_scores = self.get_weights()
     
-    def preprocess_input(self):
+    def preprocess_input(self,c):
         filtered_words = [self.lemmatizer.lemmatize(word) for word in self.tokens if word not in self.stop_words]
         filtered_sentence = ' '.join(filtered_words)
         

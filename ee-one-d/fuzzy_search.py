@@ -1,3 +1,13 @@
+"""
+Module: fuzzy_search.py
+Author: Akil Krishna, M Rishikesh, Sri Guru Datta Pisupati,Simhadri Adhit
+
+This module provides a function, find_nearest_neighbors, for finding nearest neighbors of a query substring within a given string.
+
+Usage:
+1. Import the find_nearest_neighbors function from the fuzzy_search module.
+2. Call the function with the query substring, string, distance threshold, length threshold, and number of nearest neighbors as arguments.
+"""
 from typing import List, Optional, Tuple
 
 
