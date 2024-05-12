@@ -53,7 +53,7 @@ class AttentionModel(torch.nn.Module):
 
         self.stop_words = set(stopwords.words("english"))
 
-    def preprocess_input(self) -> torch.Tensor:
+    def _preprocess_input(self) -> torch.Tensor:
         """
         Preprocesses the input string by removing stop words, lemmatizing, and tokenizing it.
         """
@@ -80,7 +80,7 @@ class AttentionModel(torch.nn.Module):
         """
         Performs forward pass of the model on the input tensor.
         """
-        tokens_tensor = self.preprocess_input()
+        tokens_tensor = self._preprocess_input()
         with torch.no_grad():
             outputs = self.model(tokens_tensor)
 
@@ -93,7 +93,7 @@ class AttentionModel(torch.nn.Module):
 
         return importance_scores
 
-    def get_weights(self) -> torch.Tensor:
+    def _get_weights(self) -> torch.Tensor:
         """
         Calculates the importance scores for each token in the input string.
         """
@@ -104,7 +104,7 @@ class AttentionModel(torch.nn.Module):
         """
         Returns the top n most important tokens in the input string.
         """
-        self.get_weights()
+        self._get_weights()
         top_n_indices = self.importance_scores.argsort(descending=True)[:n]
 
         top_n_tokens = [

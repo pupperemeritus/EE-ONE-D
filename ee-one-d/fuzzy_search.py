@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def sellers_dist(
+def _sellers_dist(
     str1: str,
     str2: str,
     cost_sub: float = 0.5,
@@ -120,7 +120,7 @@ def find_nearest_neighbors(
             ):
                 continue
 
-            distance = sellers_dist(query_substring, substring)
+            distance = _sellers_dist(query_substring, substring)
 
             if (distance <= distance_threshold) or (len(nearest_neighbors) < n):
                 nearest_neighbors.append((substring, distance))
