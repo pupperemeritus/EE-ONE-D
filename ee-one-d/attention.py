@@ -104,6 +104,7 @@ class AttentionModel(torch.nn.Module):
         """
         Returns the top n most important tokens in the input string.
         """
+        logger.debug('Started get_n_words function')
         self.get_weights()
         top_n_indices = self.importance_scores.argsort(descending=True)[:n]
 
@@ -112,7 +113,7 @@ class AttentionModel(torch.nn.Module):
             for i in top_n_indices
             if i < len(self.filtered_tokens)
         ]
-
+        logger.debug('Ended get_n_words')
         return top_n_tokens
 
 

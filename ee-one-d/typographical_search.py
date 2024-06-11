@@ -28,7 +28,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 class TypographicalNeighbors:
     """
     A class for finding typographical neighbors of a given input string.
@@ -68,7 +67,6 @@ class TypographicalNeighbors:
         self.typographical_neighbors = []
 
         self.model_name = model_name
-
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = AutoModel.from_pretrained(self.model_name)
 
