@@ -95,7 +95,7 @@ class SemanticSearch:
             "SemanticSearch initialized with model: %s, tokenizer: %s", model, tokenizer
         )
 
-    def find_semantic_neighbors(self, query: str, k: int) -> List[Tuple[str, float]]:
+    def _find_semantic_neighbors(self, query: str, k: int) -> List[Tuple[str, float]]:
         """
         Find semantic neighbors for a given query in the document.
 
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     # Test the find_semantic_neighbors method
     query = "I like caffeine"
     k = 4
-    semantic_neighbors = semantic_search.find_semantic_neighbors(query, k)
+    semantic_neighbors = semantic_search._find_semantic_neighbors(query, k)
 
     for neighbor, similarity in semantic_neighbors:
         print(f"Neighbor: {neighbor}")
