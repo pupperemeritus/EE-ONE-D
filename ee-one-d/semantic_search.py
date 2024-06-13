@@ -52,7 +52,7 @@ class SemanticSearch:
 
     def __init__(
         self,
-        input_query: str = "",
+        query: str = "",
         model: str = "togethercomputer/m2-bert-80M-32k-retrieval",
         tokenizer: str = "bert-base-uncased",
         document: Union[List[str], str] = [],
@@ -92,7 +92,7 @@ class SemanticSearch:
         elif isinstance(document, list(list)):
             self.document = [sent_tokenize(" ".join(sentence)) for sentence in document]
 
-        self.query = input_query
+        self.query = query
         logger.debug(
             "SemanticSearch initialized with model: %s, tokenizer: %s", model, tokenizer
         )
@@ -177,7 +177,7 @@ if __name__ == "__main__":
 
     query = "I like caffeine"
     semantic_search = SemanticSearch(
-        input_query=query, model=model_name, tokenizer=tokenizer_name, document=document
+        query=query, model=model_name, tokenizer=tokenizer_name, document=document
     )
 
     # Test the find_semantic_neighbors method

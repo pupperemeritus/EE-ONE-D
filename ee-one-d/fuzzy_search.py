@@ -84,7 +84,7 @@ def _sellers_dist(
 
 
 def find_nearest_neighbors(
-    query_substring: str,
+    query: str,
     string: str,
     distance_threshold: int = 2,
     n: int = 4,
@@ -117,12 +117,12 @@ def find_nearest_neighbors(
         for j in range(i + 1, len(string) + 1):
             substring = string[i:j]
             if (
-                len(substring) < len(query_substring) - length_threshold
-                or len(substring) > len(query_substring) + length_threshold
+                len(substring) < len(query) - length_threshold
+                or len(substring) > len(query) + length_threshold
             ):
                 continue
 
-            distance = _sellers_dist(query_substring, substring)
+            distance = _sellers_dist(query, substring)
 
             if (distance <= distance_threshold) or (len(nearest_neighbors) < n):
                 nearest_neighbors.append((substring, distance))

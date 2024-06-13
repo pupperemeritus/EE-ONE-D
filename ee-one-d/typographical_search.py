@@ -56,7 +56,7 @@ class TypographicalNeighbors(SearchClass):
 
     def __init__(
         self,
-        input_string: str,
+        query: str,
         model_name: str = "sentence-transformers/paraphrase-MiniLM-L6-v2",
         distance: int = 1,
     ):
@@ -75,7 +75,7 @@ class TypographicalNeighbors(SearchClass):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.metric = nltk.edit_distance
 
-        self.input_string = input_string
+        self.input_string = query
         self.typographical_neighbors = []
 
         self.model_name = model_name

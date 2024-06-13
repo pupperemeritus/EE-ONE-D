@@ -9,6 +9,7 @@ class SearchPipeline:
         self,
         input_class_list: List[SearchClass],
         primary_arg: str,
+        primary_arg_name: str,
         init_arg_dict: List[Dict],
         call_arg_dict: List[Dict],
     ):
@@ -28,6 +29,7 @@ class SearchPipeline:
         """
         self.classes = input_class_list
         self.primary_arg = primary_arg
+        self.primary_arg_name = primary_arg_name
         self.init_arg_list = init_arg_dict
         self.call_arg_list = call_arg_dict
         self.objects = []
@@ -48,7 +50,9 @@ class SearchPipeline:
         curr_input = self.primary_arg
 
         for class_obj, call_args in zip(self.objects, self.call_arg_list):
-            curr_input = class_obj(curr_input, **call_args)
+            # Pack curr_input into call_args before calling class_obj
+            call_args_with_input = {**call_args, self.primary_arg_name: curr_input}
+            curr_input = class_obj(**call_args_with_input)
             results.append(curr_input)
 
         return results
@@ -89,7 +93,8 @@ if __name__ == "__main__":
     # Create TextPipeline instance
     pipeline = SearchPipeline(
         input_class_list,
-        primary_arg=10,
+        primary_arg=2,
+        primary_arg_name="input_value",
         init_arg_dict=init_arg_dict,
         call_arg_dict=call_arg_dict,
     )
