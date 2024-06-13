@@ -12,6 +12,8 @@ Usage:
 import logging
 from typing import List, Tuple
 
+from base import SearchClass
+
 logging.basicConfig(
     level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -133,6 +135,27 @@ def find_nearest_neighbors(
         return nearest_neighbors[:n]
     else:
         return nearest_neighbors
+
+
+class FuzzySearch(SearchClass):
+
+    def __init__(self, input_str: str):
+        self.input_str = input_str
+
+    def __call__(
+        self,
+        string: str,
+        distance_threshold: int = 2,
+        n: int = 4,
+        length_threshold: int = 0,
+    ):
+        return find_nearest_neighbors(
+            self.input_str,
+            string,
+            distance_threshold,
+            length_threshold,
+            n,
+        )
 
 
 if __name__ == "__main__":

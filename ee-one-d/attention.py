@@ -23,13 +23,15 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from transformers import BertModel, BertTokenizer
 
+from base import SearchClass
+
 logging.basicConfig(
     level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
-class AttentionModel(torch.nn.Module):
+class AttentionModel(torch.nn.Module, SearchClass):
     def __init__(self, input_string: str, model_name: str = "bert-base-uncased"):
         """
         Initializes the AttentionModel with the input_string and an optional model_name.
@@ -46,8 +48,9 @@ class AttentionModel(torch.nn.Module):
             None
         """
         super(AttentionModel, self).__init__()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.input_string = input_string.lower()
-        self.model = BertModel.from_pretrained(model_name)
+        self.model = BertModel.from_pretrained(model_name).to(self.device)
         self.tokenizer = BertTokenizer.from_pretrained(model_name)
         self.lemmatizer = WordNetLemmatizer()
 
@@ -80,7 +83,7 @@ class AttentionModel(torch.nn.Module):
         """
         Performs forward pass of the model on the input tensor.
         """
-        tokens_tensor = self._preprocess_input()
+        tokens_tensor = self._preprocess_input().to(self.device)
         with torch.no_grad():
             outputs = self.model(tokens_tensor)
 
@@ -100,7 +103,7 @@ class AttentionModel(torch.nn.Module):
         self.importance_scores = self.forward()
         return self.importance_scores
 
-    def get_n_words(self, n: int) -> List[str]:
+    def __call__(self, n: int) -> List[str]:
         """
         Returns the top n most important tokens in the input string.
         """
@@ -112,11 +115,11 @@ class AttentionModel(torch.nn.Module):
             for i in top_n_indices
             if i < len(self.filtered_tokens)
         ]
-        logger.debug('Ended get_n_words')
+        logger.debug("Ended get_n_words")
         return top_n_tokens
 
 
 if __name__ == "__main__":
     model = AttentionModel(input_string="A cat sat on the mat")
-    top_tokens = model.get_n_words(2)
+    top_tokens = model(2)
     print("Top tokens:", top_tokens)

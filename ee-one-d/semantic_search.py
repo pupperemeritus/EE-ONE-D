@@ -52,6 +52,7 @@ class SemanticSearch:
 
     def __init__(
         self,
+        input_query: str = "",
         model: str = "togethercomputer/m2-bert-80M-32k-retrieval",
         tokenizer: str = "bert-base-uncased",
         document: Union[List[str], str] = [],
@@ -91,41 +92,10 @@ class SemanticSearch:
         elif isinstance(document, list(list)):
             self.document = [sent_tokenize(" ".join(sentence)) for sentence in document]
 
+        self.query = input_query
         logger.debug(
             "SemanticSearch initialized with model: %s, tokenizer: %s", model, tokenizer
         )
-
-    def _find_semantic_neighbors(self, query: str, k: int) -> List[Tuple[str, float]]:
-        """
-        Find semantic neighbors for a given query in the document.
-
-        Parameters
-        ----------
-        query : str
-            The query string for which to find semantic neighbors.
-        k : int
-            The number of semantic neighbors to retrieve.
-
-        Returns
-        -------
-        List[Tuple[str, float]]
-            A list of tuples containing the text of the semantic neighbor and its similarity score.
-        """
-        logger.debug("Finding semantic neighbors for query: %s", query)
-
-        query_embedding = self._get_embedding(query)
-        semantic_neighbors = []
-        for text in self.document:
-            corpus_embedding = self._get_embedding(text).to(self.device)
-            similarity = F.cosine_similarity(query_embedding, corpus_embedding).item()
-            semantic_neighbors.append((text, similarity))
-            if len(semantic_neighbors) == k:
-                break
-        semantic_neighbors.sort(key=lambda x: x[1], reverse=True)
-
-        logger.debug("Found semantic neighbors for query: %s", query)
-
-        return semantic_neighbors
 
     def _get_embedding(self, text: str) -> torch.Tensor:
         """
@@ -161,10 +131,42 @@ class SemanticSearch:
 
         return outputs["sentence_embedding"]
 
+    def __call__(self, k: int) -> List[Tuple[str, float]]:
+        """
+        Find semantic neighbors for a given query in the document.
+
+        Parameters
+        ----------
+        query : str
+            The query string for which to find semantic neighbors.
+        k : int
+            The number of semantic neighbors to retrieve.
+
+        Returns
+        -------
+        List[Tuple[str, float]]
+            A list of tuples containing the text of the semantic neighbor and its similarity score.
+        """
+        logger.debug("Finding semantic neighbors for query: %s", query)
+
+        query_embedding = self._get_embedding(query)
+        semantic_neighbors = []
+        for text in self.document:
+            corpus_embedding = self._get_embedding(text).to(self.device)
+            similarity = F.cosine_similarity(query_embedding, corpus_embedding).item()
+            semantic_neighbors.append((text, similarity))
+            if len(semantic_neighbors) == k:
+                break
+        semantic_neighbors.sort(key=lambda x: x[1], reverse=True)
+
+        logger.debug("Found semantic neighbors for query: %s", query)
+
+        return semantic_neighbors
+
 
 if __name__ == "__main__":
     model_name = "togethercomputer/m2-bert-80M-32k-retrieval"
-    tokenizer_name = "bert-base-uncased"
+    tokenizer_name = "togethercomputer/m2-bert-80M-32k-retrieval"
     document = [
         "Every morning, I make a cup of coffee to start my day.",
         "I enjoy reading books to relax and unwind.",
@@ -173,14 +175,14 @@ if __name__ == "__main__":
         "I enjoy playing video games in my free time.",
     ]
 
+    query = "I like caffeine"
     semantic_search = SemanticSearch(
-        model=model_name, tokenizer=tokenizer_name, document=document
+        input_query=query, model=model_name, tokenizer=tokenizer_name, document=document
     )
 
     # Test the find_semantic_neighbors method
-    query = "I like caffeine"
     k = 4
-    semantic_neighbors = semantic_search._find_semantic_neighbors(query, k)
+    semantic_neighbors = semantic_search(k)
 
     for neighbor, similarity in semantic_neighbors:
         print(f"Neighbor: {neighbor}")
