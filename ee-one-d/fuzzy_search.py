@@ -15,7 +15,7 @@ from typing import List, Tuple
 from base import SearchClass
 
 logging.basicConfig(
-    level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -139,23 +139,26 @@ def find_nearest_neighbors(
 
 class FuzzySearch(SearchClass):
 
-    def __init__(self, input_str: str):
-        self.input_str = input_str
+    def __init__(self, query: str):
+        self.query = query
 
     def __call__(
         self,
-        string: str,
         distance_threshold: int = 2,
         n: int = 4,
         length_threshold: int = 0,
     ):
-        return find_nearest_neighbors(
-            self.input_str,
-            string,
-            distance_threshold,
-            length_threshold,
-            n,
-        )
+        result = []
+        for sentence in self.document:
+            result.append(
+                find_nearest_neighbors(
+                    self.query,
+                    sentence,
+                    distance_threshold,
+                    length_threshold,
+                    n,
+                )
+            )
 
 
 if __name__ == "__main__":

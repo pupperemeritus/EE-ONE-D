@@ -1,17 +1,17 @@
 import logging
 from collections import defaultdict
+from typing import Dict, List
 
-from attention import *
-from fuzzy_search import *
-from pipeline import *
-from semantic_search import *
-from typographical_search import *
-
-logger = logging.getLogger(__name__)
+from attention import AttentionModel
+from fuzzy_search import FuzzySearch
+from pipeline import SearchPipeline
+from semantic_search import SemanticSearch
+from typographical_search import TypographicalNeighbors
 
 logging.basicConfig(
-    level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
+logger = logging.getLogger(__name__)
 
 
 class LFSS:
@@ -24,23 +24,31 @@ class LFSS:
         document: List[str],
         use_attention: bool = False,
     ):
+        logger.debug(
+            f"Initializing LFSS with input parameters. Query: {query}, Document: {document}, Use Attention: {use_attention}"
+        )
+
         self.query = query
         self.document = document
         self.use_attention = use_attention
         self.class_list = [
-            SemanticSearch,
             TypographicalNeighbors,
+            SemanticSearch,
             AttentionModel,
             FuzzySearch,
         ]
+        logger.debug(f"Original class list: {self.class_list}")
         if not use_attention:
+            logger.debug(f"Removing AttentionModel from class list")
             self.class_list.pop(-2)
+        logger.debug(f"Modified class list: {self.class_list}")
 
         self.pipeline = SearchPipeline(
-            self.class_list, query, init_arg_dict, call_arg_dict
+            self.class_list, query, "query", init_arg_dict, call_arg_dict
         )
 
     def __call__(self):
+        logger.debug("Running pipeline")
         return self.pipeline.run()
 
 
@@ -66,8 +74,8 @@ if __name__ == "__main__":
     ]
 
     lfss = LFSS(
-        init_arg_dict={},
-        call_arg_dict={},
+        init_arg_dict=[{}, {"k": 4}, {}],
+        call_arg_dict=[{}, {}, {}],
         query=input_string,
         document=document,
         use_attention=False,

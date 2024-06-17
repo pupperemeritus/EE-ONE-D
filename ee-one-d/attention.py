@@ -18,15 +18,14 @@ import logging
 from typing import List
 
 import torch
+from base import SearchClass
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from transformers import BertModel, BertTokenizer
 
-from base import SearchClass
-
 logging.basicConfig(
-    level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 

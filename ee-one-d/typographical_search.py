@@ -26,7 +26,7 @@ from base import SearchClass
 from transformers import AutoModel, AutoTokenizer
 
 logging.basicConfig(
-    level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -209,4 +209,3 @@ if __name__ == "__main__":
     input_string = "dogs"
     tn = TypographicalNeighbors(input_string)
     print(tn(4))
-    
