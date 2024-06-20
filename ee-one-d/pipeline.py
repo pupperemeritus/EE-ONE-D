@@ -46,7 +46,10 @@ class SearchPipeline:
             if not results:
                 logger.debug(f"Initializing  {current_class.__name__}")
                 current_init_args[self.primary_arg_name] = self.primary_arg
-                for result in current_class(**current_init_args)(**current_call_args):
+                for result in np.reshape(
+                    np.array([current_class(**current_init_args)(**current_call_args)]),
+                    (-1),
+                ):
                     results.append(result)
                 logger.debug(f"Results: {results}")
             else:
@@ -56,8 +59,11 @@ class SearchPipeline:
                     current_result = results.pop(0)
                     logger.debug(f"Current result {current_result}")
                     current_init_args[self.primary_arg_name] = current_result
-                    for result in current_class(**current_init_args)(
-                        **current_call_args
+                    for result in np.reshape(
+                        np.array(
+                            [current_class(**current_init_args)(**current_call_args)]
+                        ),
+                        (-1),
                     ):
                         new_results.append(result)
                     logger.debug(f"New results: {new_results}")
@@ -103,7 +109,7 @@ if __name__ == "__main__":
     # Create TextPipeline instance
     pipeline = SearchPipeline(
         input_class_list,
-        primary_arg=2,
+        primary_arg=3,
         primary_arg_name="input_value",
         init_arg_dict=init_arg_dict,
         call_arg_dict=call_arg_dict,
