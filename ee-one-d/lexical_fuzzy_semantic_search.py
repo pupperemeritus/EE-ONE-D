@@ -24,6 +24,7 @@ class LFSS:
         document: List[str],
         use_attention: bool = False,
     ):
+        
         logger.debug(
             f"Initializing LFSS with input parameters. Query: {query}, Document: {document}, Use Attention: {use_attention}"
         )
@@ -37,10 +38,13 @@ class LFSS:
             AttentionModel,
             FuzzySearch,
         ]
+
         logger.debug(f"Original class list: {self.class_list}")
+
         if not use_attention:
             logger.debug(f"Removing AttentionModel from class list")
             self.class_list.pop(-2)
+
         logger.debug(f"Modified class list: {self.class_list}")
 
         self.pipeline = SearchPipeline(
