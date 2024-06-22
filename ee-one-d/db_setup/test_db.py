@@ -52,7 +52,7 @@ class Timer:
 connections.connect(alias="default", host="localhost", port=19530)
 
 client = MilvusClient()
-
+logging.debug(db.list_database())
 db.using_database("eeoned")
 # Use the existing collection
 collection_name = "semantic_embeddings"
@@ -83,7 +83,7 @@ schema = CollectionSchema(
 
 try:
     timer = Timer()
-    query = "coffee"
+    query = sys.argv[1]
     encoded_query = ef.encode_queries([query])
     logging.info(f"Encoded query shape: {len(encoded_query[0])}")
     timer.start()
@@ -91,13 +91,19 @@ try:
         data=encoded_query,
         anns_field="vector",
         param={"metric_type": "L2"},
-        limit=100,
+        limit=11,
         output_fields=["text", "subject"],
     )
     timer.stop()
     logging.info(f"Length of results: {len(results[0])}")
     logging.info(timer)
+
     if results:
+        (
+            results[0].pop(0)
+            if results[0][0].entity.get("text") == query
+            else results[0].pop(-1)
+        )
         for hits in results:
             for hit in hits:
                 print(

@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import multiprocessing
+import string
 
 import nltk
 import pandas as pd
@@ -43,17 +44,34 @@ def encode_and_prepare_data():
     # Load NLTK words
     words = nltk.corpus.words.words()
 
+    # Process words
+    processed_words = set()
+    for word in words:
+        # Convert to lowercase
+        word = word.lower()
+        # Remove punctuation
+        word = word.translate(str.maketrans("", "", string.punctuation))
+        # Remove words shorter than 2 characters
+        if len(word) > 1:
+            processed_words.add(word)
+
+    # Convert set back to list
+    processed_words = list(processed_words)
+
+    logging.info(f"Original word count: {len(words)}")
+    logging.info(f"Processed word count: {len(processed_words)}")
+
     # Encode words to obtain vectors
-    vectors = ef.encode_documents(words)
+    vectors = ef.encode_documents(processed_words)
 
     logging.debug(f"Dim: {ef.dim}, {len(vectors[0])}")
 
     # Prepare data for upload
     data = {
-        "id": list(range(len(words))),
+        "id": list(range(len(processed_words))),
         "vector": vectors,
-        "text": words,
-        "subject": ["words"] * len(words),
+        "text": processed_words,
+        "subject": ["words"] * len(processed_words),
     }
 
     return data, len(vectors[0])
