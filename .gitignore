@@ -71,3 +71,6 @@ ipython_config.py
 # pipenv
 .Python
 pipfile.lock
+
+json_data
+volumes
