@@ -53,6 +53,7 @@ connections.connect(alias="default", host="localhost", port=19530)
 
 client = MilvusClient()
 
+db.using_database("eeoned")
 # Use the existing collection
 collection_name = "semantic_embeddings"
 if not utility.has_collection(collection_name):
@@ -82,19 +83,20 @@ schema = CollectionSchema(
 
 try:
     timer = Timer()
-    query = "tea"
+    query = "coffee"
     encoded_query = ef.encode_queries([query])
     logging.info(f"Encoded query shape: {len(encoded_query[0])}")
     timer.start()
     results = collection.search(
         data=encoded_query,
         anns_field="vector",
-        param={"metric_type": "L2", "params": {"nprobe": 10}},
-        limit=10,
+        param={"metric_type": "L2"},
+        limit=100,
         output_fields=["text", "subject"],
     )
     timer.stop()
-    logging.debug(timer)
+    logging.info(f"Length of results: {len(results[0])}")
+    logging.info(timer)
     if results:
         for hits in results:
             for hit in hits:

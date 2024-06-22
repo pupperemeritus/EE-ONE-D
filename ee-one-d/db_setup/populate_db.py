@@ -51,7 +51,7 @@ def encode_and_prepare_data():
     # Prepare data for upload
     data = {
         "id": list(range(len(words))),
-        "vector": vectors,  # vectors is already a list of lists
+        "vector": vectors,
         "text": words,
         "subject": ["words"] * len(words),
     }
@@ -86,13 +86,12 @@ async def main():
     # Connect to Milvus client
     client = MilvusClient(host="localhost", db_name="eeoned", port=19530, timeout=10**5)
 
-    # ... rest of the function remains the same ...
-
     # Define collection name
     collection_name = "semantic_embeddings"
-
+    db.using_database("eeoned")
     # Drop collection if exists and create new collection with ORM
     if client.has_collection(collection_name=collection_name):
+        logging.debug("Dropping collection")
         client.drop_collection(collection_name=collection_name)
 
     # Define collection schema using CollectionSchema and FieldSchema
@@ -108,25 +107,29 @@ async def main():
     # Create collection using Collection
     collection = Collection(name=collection_name, schema=schema)
 
-    # Create index
+    # Supported index params, modify these based on your Milvus version and support
     index_params = {
-        "index_type": "GPU_IVF_FLAT",
+        "index_type": "GPU_IVF_FLAT",  # Change this if needed
         "params": {"nlist": 128},
-        "metric_type": "L2",
+        "metric_type": "L2",  # Change this if needed
     }
-    collection.create_index(field_name="vector", index_params=index_params)
+
+    try:
+        collection.create_index(field_name="vector", index_params=index_params)
+    except Exception as e:
+        print(f"Failed to create index: {e}")
+        return
 
     # Perform bulk insertion concurrently
     await bulk_insert_concurrent(collection, data)
 
     logging.info("Bulk insertion completed.")
-
+    collection.flush()
     # Load the collection
     collection.load()
 
-    # Verify data insertion
     print(f"Number of entities in collection: {collection.num_entities}")
-    collection.flush()
+    # Verify data insertion
     # Disconnect from Milvus
     connections.disconnect("default")
 
