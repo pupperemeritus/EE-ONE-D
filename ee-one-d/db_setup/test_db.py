@@ -1,4 +1,5 @@
 import logging
+import sys
 import time
 
 from pymilvus import MilvusClient, connections, db, utility
@@ -6,7 +7,7 @@ from pymilvus.model.dense import SentenceTransformerEmbeddingFunction
 from pymilvus.orm.collection import Collection, CollectionSchema, DataType, FieldSchema
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
@@ -92,7 +93,7 @@ try:
         anns_field="vector",
         param={"metric_type": "L2"},
         limit=11,
-        output_fields=["text", "subject"],
+        output_fields=["text"],
     )
     timer.stop()
     logging.info(f"Length of results: {len(results[0])}")

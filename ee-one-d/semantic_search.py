@@ -21,8 +21,8 @@ from typing import List, Optional, Tuple, Union
 
 import torch
 import torch.nn.functional as F
-from nltk.tokenize import sent_tokenize
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from base import SearchClass
+from models import QueryDBModel
 
 logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 logging.basicConfig(
@@ -31,15 +31,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class SemanticSearch:
+class SemanticSearch(SearchClass):
     """
     Class for finding semantic neighbors of a given input string using pre-trained language models as the default metric.
 
     Attributes:
         model : AutoModelForSequenceClassification
             The pre-trained model for semantic search.
-        tokenizer : string
-            The tokenizer for tokenizing input strings.
         model_name : string
             The name of the pre-trained model to be used.
         max_seq_length : int
@@ -54,8 +52,6 @@ class SemanticSearch:
         self,
         query: str = "",
         model: str = "togethercomputer/m2-bert-80M-32k-retrieval",
-        tokenizer: str = "bert-base-uncased",
-        document: Union[List[str], str] = [],
         max_seq_length: Optional[int] = 1024,
     ):
         """
@@ -74,64 +70,12 @@ class SemanticSearch:
         """
         logger.debug("Initializing SemanticSearch class")
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.max_seq_length = max_seq_length
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            model, trust_remote_code=True
-        ).to(self.device)
-        try:
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                tokenizer, trust_remote_code=True, model_max_length=self.max_seq_length
-            )
-        except:
-            logging.error("Failed to load tokenizer, too large of a sequence length.")
-        if isinstance(document, str):
-            self.document = sent_tokenize(document)
-        elif isinstance(document, list):
-            self.document = document
-        elif isinstance(document, list(list)):
-            self.document = [sent_tokenize(" ".join(sentence)) for sentence in document]
+        self.model = QueryDBModel(model=model, max_seq_length=max_seq_length)
 
         self.query = query
-        logger.debug(
-            "SemanticSearch initialized with model: %s, tokenizer: %s", model, tokenizer
-        )
+        logger.debug("SemanticSearch initialized with model: %s", model)
 
-    def _get_embedding(self, text: str) -> torch.Tensor:
-        """
-        Get the embedding for the input text using the tokenizer and model.
-
-        Parameters
-        ----------
-        text : str
-            The input text for which the embedding needs to be generated.
-
-        Returns
-        -------
-        torch.Tensor
-            The embedding for the input text.
-        """
-        logger.debug("Generating embedding for text: %s", text)
-        input_ids = self.tokenizer(
-            [text],
-            return_tensors="pt",
-            padding="max_length",
-            return_token_type_ids=False,
-            truncation=True,
-            max_length=self.max_seq_length,
-        ).to(self.device)
-
-        try:
-            outputs = self.model(**input_ids)
-        except Exception as e:
-            logging.error("Failed to generate embedding. Out of memory")
-            raise e
-
-        logger.debug("Generated embedding for text: %s", text)
-
-        return outputs["sentence_embedding"]
-
-    def __call__(self, k: int) -> List[Tuple[str, float]]:
+    def __call__(self, limit: int = 10) -> List[Tuple[str, float]]:
         """
         Find semantic neighbors for a given query in the document.
 
@@ -148,42 +92,25 @@ class SemanticSearch:
             A list of tuples containing the text of the semantic neighbor and its similarity score.
         """
         logger.debug("Finding semantic neighbors for query: %s", query)
-
-        query_embedding = self._get_embedding(query)
-        semantic_neighbors = []
-        for text in self.document:
-            corpus_embedding = self._get_embedding(text).to(self.device)
-            similarity = F.cosine_similarity(query_embedding, corpus_embedding).item()
-            semantic_neighbors.append((text, similarity))
-            if len(semantic_neighbors) == k:
-                break
-        semantic_neighbors.sort(key=lambda x: x[1], reverse=True)
-
+        semantic_neighbors = self.model.query(self.query, limit)
         logger.debug("Found semantic neighbors for query: %s", query)
+        semantic_neighbors_text = []
+        for semantic_neighbor in semantic_neighbors:
+            semantic_neighbors_text.append(semantic_neighbor.entity.get("text"))
 
-        return semantic_neighbors
+        return semantic_neighbors_text
 
 
 if __name__ == "__main__":
     model_name = "togethercomputer/m2-bert-80M-32k-retrieval"
     tokenizer_name = "togethercomputer/m2-bert-80M-32k-retrieval"
-    document = [
-        "Every morning, I make a cup of coffee to start my day.",
-        "I enjoy reading books to relax and unwind.",
-        "I love going for hikes in the beautiful outdoors.",
-        "Cooking is a fun way to experiment with different recipes.",
-        "I enjoy playing video games in my free time.",
-    ]
 
-    query = "I like caffeine"
-    semantic_search = SemanticSearch(
-        query=query, model=model_name, tokenizer=tokenizer_name, document=document
-    )
+    query = "caffeine"
+    semantic_search = SemanticSearch(query=query, model=model_name)
 
     # Test the find_semantic_neighbors method
-    k = 4
+    k = 10
     semantic_neighbors = semantic_search(k)
 
-    for neighbor, similarity in semantic_neighbors:
+    for neighbor in semantic_neighbors:
         print(f"Neighbor: {neighbor}")
-        print(f"Similarity: {similarity}\n")
