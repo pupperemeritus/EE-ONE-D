@@ -78,7 +78,7 @@ class SearchPipeline:
                     ):
                         new_results.append(result)
 
-                    logger.debug(f"New results: {new_results}")
+                    logger.info(f"New results: {new_results}")
 
                 results = new_results
                 

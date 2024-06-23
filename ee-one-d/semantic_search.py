@@ -48,12 +48,13 @@ class SemanticSearch(SearchClass):
         """
         logger.debug("Initializing SemanticSearch class")
 
+
         self.model = QueryDBModel(model=model_name)
 
         self.query = query
         logger.debug("SemanticSearch initialized with model: %s", model_name)
 
-    def __call__(self, limit: int = 10) -> List[Tuple[str, float]]:
+    def __call__(self, limit: int = 5) -> List[Tuple[str, float]]:
         """
         Find semantic neighbors for a given query in the document.
 
@@ -69,9 +70,9 @@ class SemanticSearch(SearchClass):
         List[Tuple[str, float]]
             A list of tuples containing the text of the semantic neighbor and its similarity score.
         """
-        logger.debug("Finding semantic neighbors for query: %s", query)
+        logger.debug("Finding semantic neighbors for query: %s", self.query)
         semantic_neighbors = self.model.query(self.query, limit)
-        logger.debug("Found semantic neighbors for query: %s", query)
+        logger.debug("Found semantic neighbors for query: %s", self.query)
         semantic_neighbors_text = []
         for semantic_neighbor in semantic_neighbors:
             semantic_neighbors_text.append(semantic_neighbor.entity.get("text"))

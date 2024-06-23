@@ -24,7 +24,7 @@ class LFSS:
         document: List[str],
         use_attention: bool = False,
     ):
-        
+
         logger.debug(
             f"Initializing LFSS with input parameters. Query: {query}, Document: {document}, Use Attention: {use_attention}"
         )
@@ -35,15 +35,12 @@ class LFSS:
         self.class_list = [
             TypographicalNeighbors,
             SemanticSearch,
-            AttentionModel,
             FuzzySearch,
         ]
 
         logger.debug(f"Original class list: {self.class_list}")
 
-        if not use_attention:
-            logger.debug(f"Removing AttentionModel from class list")
-            self.class_list.pop(-2)
+        init_arg_dict[-1]["document"] = self.document
 
         logger.debug(f"Modified class list: {self.class_list}")
 
@@ -78,10 +75,15 @@ if __name__ == "__main__":
     ]
 
     lfss = LFSS(
-        init_arg_dict=[{}, {"k": 4}, {}],
-        call_arg_dict=[{}, {}, {}],
+        init_arg_dict=[{}, {}, {}],
+        call_arg_dict=[{}, {"limit": 3}, {"limit": 3}],
         query=input_string,
         document=document,
         use_attention=False,
     )
-    print(lfss())
+    results = lfss()
+
+    for result in results:
+        print(f"\nIn sentence: '{result['sentence']}'")
+        print(f"\nFound: '{result['word']}'\n(Distance: {result['distance']})")
+        print(f"\nContext: '{result['context']}'")

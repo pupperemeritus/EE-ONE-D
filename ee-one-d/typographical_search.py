@@ -178,7 +178,7 @@ class TypographicalNeighbors(SearchClass):
 
         return sorted_neighbors
 
-    def __call__(self, n: int = 10) -> List[str]:
+    def __call__(self, n: int = 4) -> List[str]:
         """
         Display the typographical neighbors of the input string up to a specified number.
 
@@ -192,14 +192,14 @@ class TypographicalNeighbors(SearchClass):
         typographical_neighbors_list : List[str]
             A list of typographical neighbors.
         """
-        logging.debug("Finding typographical neighbors")
+        logger.debug("Finding typographical neighbors")
 
         sorted_neighbors = remove_duplicates(self._sort_by_similarity())
         n = min(n, len(sorted_neighbors))
         typographical_neighbors_list = sorted_neighbors[:n]
 
-        logging.debug(sorted_neighbors)
-        logging.debug("Found typographical neighbors")
+        logger.debug(sorted_neighbors)
+        logger.debug("Found typographical neighbors")
 
         return typographical_neighbors_list
 

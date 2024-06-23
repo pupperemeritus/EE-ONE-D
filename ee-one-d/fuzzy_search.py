@@ -10,9 +10,11 @@ Usage:
 """
 
 import logging
+import re
 from typing import List, Tuple
 
 from base import SearchClass
+from nltk import tokenize
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -21,8 +23,8 @@ logger = logging.getLogger(__name__)
 
 
 def _sellers_dist(
-    str1: str,
-    str2: str,
+    query_substring: str,
+    input_string: str,
     cost_sub: float = 0.5,
     cost_ins: float = 1,
     cost_del: float = 1,
@@ -49,22 +51,21 @@ def _sellers_dist(
         The calculated Levenshtein distance
     """
     logger.debug(
-        "Calculating Levenshtein distance between strings: %s and %s", str1, str2
+        "Calculating Levenshtein distance between strings: %s and %s",
+        query_substring,
+        input_string,
     )
     logger.debug("Query Substring: %s", query_substring)
-    logger.debug("Input String: %s", string)
-    logger.debug("Distance Threshold: %s", distance_threshold)
-    logger.debug("Length Threshold: %s", length_threshold)
-    logger.debug("Number of Neighbors: %s", n)
+    logger.debug("Input String: %s", input_string)
 
-    prev_row = list(range(len(str2) + 1))
+    prev_row = list(range(len(input_string) + 1))
 
     min_distance = float("inf")
 
-    for i in range(len(str1)):
+    for i in range(len(query_substring)):
         curr_row = [i + 1]
-        for j in range(len(str2)):
-            cost = 0 if str1[i] == str2[j] else cost_sub
+        for j in range(len(input_string)):
+            cost = 0 if query_substring[i] == input_string[j] else cost_sub
             curr_row.append(
                 min(
                     curr_row[j] + cost_ins,
@@ -87,105 +88,86 @@ def find_nearest_neighbors(
     query: str,
     string: str,
     distance_threshold: int = 2,
-    n: int = 4,
-    length_threshold: int = 0,
-) -> List[Tuple[str, float]]:
-    """
-    Find the nearest neighbors of a query substring within a given string.
-
-    Parameters
-    ----------
-    query_substring : str
-        The query substring to find nearest neighbors for.
-    string : str
-        The string to search for nearest neighbors within.
-    distance_threshold : int, optional
-        The maximum allowable distance between query substring and its neighbors. Defaults to 2.
-    n : int, optional
-        The maximum number of nearest neighbors to return. Defaults to 4.
-    length_threshold : int, optional
-        The maximum allowable difference in length between query substring and its neighbors. Defaults to 0.
-
-    Returns
-    -------
-    List[Tuple[str, float]]
-        A list of tuples containing the nearest neighbors and their distances, sorted by distance.
-    """
+    limit: int = 4,
+) -> List[Tuple[str, float, int, int]]:
     nearest_neighbors = []
 
-    for i in range(len(string)):
-        for j in range(i + 1, len(string) + 1):
-            substring = string[i:j]
-            if (
-                len(substring) < len(query) - length_threshold
-                or len(substring) > len(query) + length_threshold
-            ):
-                continue
+    # Split the string into words
+    words = re.findall(r"\b\w+\b", string)
 
-            distance = _sellers_dist(query, substring)
+    for i, word in enumerate(words):
 
-            if (distance <= distance_threshold) or (len(nearest_neighbors) < n):
-                nearest_neighbors.append((substring, distance))
+        distance = _sellers_dist(query, word)
+
+        if (distance <= distance_threshold) or (len(nearest_neighbors) < limit):
+            # Calculate start and end indices for context
+            start = max(0, i - 2)
+            end = min(len(words), i + 3)
+            context = " ".join(words[start:end])
+            nearest_neighbors.append((word, distance, context))
 
     nearest_neighbors.sort(key=lambda x: x[1])
 
-    logger.debug("Nearest neighbors found: %s", nearest_neighbors)
+    logger.info("Nearest neighbors found: %s", nearest_neighbors[:limit])
 
-    if n is not None:
-        return nearest_neighbors[:n]
+    if limit is not None:
+        return nearest_neighbors[:limit]
     else:
         return nearest_neighbors
 
 
 class FuzzySearch(SearchClass):
-
-    def __init__(self, query: str):
+    def __init__(self, query: str, document: List[str]):
         self.query = query
+        self.document = document
 
     def __call__(
         self,
         distance_threshold: int = 2,
-        n: int = 4,
+        limit: int = 4,
         length_threshold: int = 0,
     ):
         result = []
-        for sentence in self.document:
-            result.append(
-                find_nearest_neighbors(
-                    self.query,
-                    sentence,
-                    distance_threshold,
-                    length_threshold,
-                    n,
-                )
+        for sentence_index, sentence in enumerate(self.document):
+            neighbors = find_nearest_neighbors(
+                self.query,
+                sentence,
+                distance_threshold,
+                limit,
             )
+            if neighbors:
+                # Only take the best match for each sentence
+                best_match = min(neighbors, key=lambda x: x[1])
+                word, distance, context = best_match
+                result.append(
+                    {
+                        "sentence_index": sentence_index,
+                        "sentence": sentence,
+                        "word": word,
+                        "distance": distance,
+                        "context": context,
+                    }
+                )
+
+        # Sort results by distance and limit to max_results
+        result.sort(key=lambda x: x["distance"])
+        return result
 
 
 if __name__ == "__main__":
+    query = "apple"
+    document = [
+        "I like to eat apples and bananas.",
+        "The apple does't fall far from the tree.",
+        "An ape ate an apple.",
+        "This sentence has no relevant words.",
+    ]
 
-    query_substring = "apple"
-    string = "ape apples banana ackle ssna pple"
-    length_threshold = 3
-    distance_threshold = 3
-    n = 4
-    nearest_neighbors_by_threshold = find_nearest_neighbors(
-        query_substring,
-        string,
-        distance_threshold=distance_threshold,
-        length_threshold=length_threshold,
-    )
-    nearest_neighbors_by_number = find_nearest_neighbors(
-        query_substring, string, n=n, length_threshold=length_threshold
-    )
+    fuzzy_search = FuzzySearch(query, document)
+    results = fuzzy_search(distance_threshold=2, limit=5)
 
-    print(
-        f"The nearest neighbors for '{query_substring}' within an edit distance of the {distance_threshold} and a length threshold of {length_threshold} in the string:"
-    )
-    for neighbor, distance in nearest_neighbors_by_threshold:
-        print(f"Neighbor: '{neighbor}' (Edit Distance: {distance})")
-
-    print(
-        f"\n{n} nearest neighbors for '{query_substring}' with a length threshold of {length_threshold} in the string:"
-    )
-    for neighbor, distance in nearest_neighbors_by_number:
-        print(f"Neighbor: '{neighbor}' (Edit Distance: {distance})")
+    print(f"Fuzzy search results for '{query}':")
+    for result in results:
+        print(f"\nIn sentence: '{result['sentence']}'")
+        print(f"\nFound: '{result['word']}'\n(Distance: {result['distance']})")
+        print(f"\nContext: '{result['context']}'")
