@@ -32,48 +32,26 @@ logger = logging.getLogger(__name__)
 
 
 class SemanticSearch(SearchClass):
-    """
-    Class for finding semantic neighbors of a given input string using pre-trained language models as the default metric.
-
-    Attributes:
-        model : AutoModelForSequenceClassification
-            The pre-trained model for semantic search.
-        model_name : string
-            The name of the pre-trained model to be used.
-        max_seq_length : int
-            The maximum sequence length.
-        document : List[str]
-            A list of strings representing the document.
-        input_text : bool
-            A flag indicating whether the input is text or not.
-    """
-
     def __init__(
         self,
         query: str = "",
-        model: str = "togethercomputer/m2-bert-80M-32k-retrieval",
-        max_seq_length: Optional[int] = 1024,
+        model_name: str = "all-MiniLM-L6-v2",
     ):
         """
         Initialize the class with the provided model name, tokenizer name, and document.
 
         Parameters
         ----------
-        model : str
+        model_name : str
             The name of the model to be loaded.
-        tokenizer : str
-            The name of the tokenizer to be loaded.
-        document : List[str]
-            A list of strings representing the document.
-        max_seq_length : int, optional
-            The maximum sequence length. Defaults to 1024.
+
         """
         logger.debug("Initializing SemanticSearch class")
 
-        self.model = QueryDBModel(model=model, max_seq_length=max_seq_length)
+        self.model = QueryDBModel(model=model_name)
 
         self.query = query
-        logger.debug("SemanticSearch initialized with model: %s", model)
+        logger.debug("SemanticSearch initialized with model: %s", model_name)
 
     def __call__(self, limit: int = 10) -> List[Tuple[str, float]]:
         """
@@ -102,11 +80,8 @@ class SemanticSearch(SearchClass):
 
 
 if __name__ == "__main__":
-    model_name = "togethercomputer/m2-bert-80M-32k-retrieval"
-    tokenizer_name = "togethercomputer/m2-bert-80M-32k-retrieval"
-
     query = "caffeine"
-    semantic_search = SemanticSearch(query=query, model=model_name)
+    semantic_search = SemanticSearch(query=query)
 
     # Test the find_semantic_neighbors method
     k = 10

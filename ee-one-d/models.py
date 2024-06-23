@@ -13,7 +13,7 @@ from pymilvus.orm.collection import Collection, CollectionSchema, DataType, Fiel
 from transformers import AutoModel, AutoTokenizer
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 logger = logging.Logger(__name__)
@@ -29,7 +29,6 @@ class QueryDBModel(ModelQuery):
     def __init__(
         self,
         model: str,
-        max_seq_length: str,
         db_alias: str = "default",
         db_host: str = "localhost",
         db_name: str = "eeoned",
@@ -37,34 +36,24 @@ class QueryDBModel(ModelQuery):
         db_port=19530,
     ):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        try:
-            connections.connect(alias=db_alias, host=db_host, port=db_port)
-            self.client = MilvusClient()
-            logger.debug(
-                f"Connected to DB:\n Alias: {db_alias}\nHost: {db_host}\nPort: {db_port}"
-            )
+        connections.connect(alias=db_alias, host=db_host, port=db_port)
+        self.client = MilvusClient()
+        logger.debug(
+            f"Connected to DB:\n Alias: {db_alias}\nHost: {db_host}\nPort: {db_port}"
+        )
 
-            db.using_database(db_name)
-            logger.debug(f"Using Database {db_name}")
+        db.using_database(db_name)
+        logger.debug(f"Using Database {db_name}")
 
-            self.collection = Collection(db_collection_name)
+        self.collection = Collection(db_collection_name)
 
-            self.embedding_func = SentenceTransformerEmbeddingFunction(
-                device=self.device, trust_remote_code=True, batch_size=512
-            )
-            logger.debug(f"Initialized embedding function")
-
-            schema = CollectionSchema(
-                [
-                    FieldSchema(name="id", dtype=DataType.INT64, is_primary=True),
-                    FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim=384),
-                    FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=256),
-                    FieldSchema(name="subject", dtype=DataType.VARCHAR, max_length=256),
-                ]
-            )
-
-        except Exception as e:
-            logger.error(e)
+        self.embedding_func = SentenceTransformerEmbeddingFunction(
+            model_name=model,
+            device=self.device,
+            trust_remote_code=True,
+            batch_size=512,
+        )
+        logger.debug(f"Initialized embedding function")
 
     def query(self, query: str, limit: int = 10):
         encoded_query = self.embedding_func.encode_queries([query])
