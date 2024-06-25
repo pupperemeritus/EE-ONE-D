@@ -1,4 +1,6 @@
 import logging
+import logging.config
+import os
 import sys
 import time
 
@@ -6,9 +8,11 @@ from pymilvus import MilvusClient, connections, db, utility
 from pymilvus.model.dense import SentenceTransformerEmbeddingFunction
 from pymilvus.orm.collection import Collection, CollectionSchema, DataType, FieldSchema
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
 
 class Timer:

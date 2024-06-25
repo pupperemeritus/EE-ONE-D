@@ -1,4 +1,6 @@
 import logging
+import logging.config
+import os
 from collections import defaultdict
 from typing import Dict, List
 
@@ -8,10 +10,11 @@ from pipeline import SearchPipeline
 from semantic_search import SemanticSearch
 from typographical_search import TypographicalNeighbors
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
 
 class LFSS:

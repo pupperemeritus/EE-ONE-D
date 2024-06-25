@@ -10,16 +10,19 @@ Usage:
 """
 
 import logging
+import logging.config
+import os
 import re
 from typing import List, Tuple
 
 from base import SearchClass
 from nltk import tokenize
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
 
 def _sellers_dist(
@@ -88,6 +91,7 @@ def find_nearest_neighbors(
     query: str,
     string: str,
     distance_threshold: int = 2,
+    length_threshold: int = 3,
     limit: int = 4,
 ) -> List[Tuple[str, float, int, int]]:
     nearest_neighbors = []
@@ -96,6 +100,11 @@ def find_nearest_neighbors(
     words = re.findall(r"\b\w+\b", string)
 
     for i, word in enumerate(words):
+        if (
+            len(word) < len(query) - length_threshold
+            or len(word) > len(query) + length_threshold
+        ):
+            continue
 
         distance = _sellers_dist(query, word)
 
@@ -125,14 +134,16 @@ class FuzzySearch(SearchClass):
         self,
         distance_threshold: int = 2,
         limit: int = 4,
-        length_threshold: int = 0,
+        length_threshold: int = 3,
     ):
         result = []
         for sentence_index, sentence in enumerate(self.document):
+
             neighbors = find_nearest_neighbors(
                 self.query,
                 sentence,
                 distance_threshold,
+                length_threshold,
                 limit,
             )
             if neighbors:

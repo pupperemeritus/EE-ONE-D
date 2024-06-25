@@ -1,13 +1,16 @@
 import logging
+import logging.config
+import os
 from typing import Dict, List, Union
 
 import numpy as np
 from base import SearchClass
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
 
 class SearchPipeline:
@@ -20,7 +23,7 @@ class SearchPipeline:
         init_arg_dict: List[Dict],
         call_arg_dict: List[Dict],
     ):
-        
+
         logger.debug(
             f"Initializing SearchPipeline class. \
                       input_class_list: {input_class_list}, \
@@ -47,16 +50,16 @@ class SearchPipeline:
                 self.call_arg_dict.pop(0),
             )
             if not results:
-                
+
                 logger.debug(f"Initializing  {current_class.__name__}")
                 current_init_args[self.primary_arg_name] = self.primary_arg
-                
+
                 for result in np.reshape(
                     np.array([current_class(**current_init_args)(**current_call_args)]),
                     (-1),
                 ):
                     results.append(result)
-                
+
                 logger.debug(f"Results: {results}")
 
             else:
@@ -67,9 +70,9 @@ class SearchPipeline:
                     logger.debug(f"Calling {current_class.__name__}")
                     current_result = results.pop(0)
                     logger.debug(f"Current result {current_result}")
-                    
+
                     current_init_args[self.primary_arg_name] = current_result
-                    
+
                     for result in np.reshape(
                         np.array(
                             [current_class(**current_init_args)(**current_call_args)]
@@ -81,7 +84,7 @@ class SearchPipeline:
                     logger.info(f"New results: {new_results}")
 
                 results = new_results
-                
+
         return results
 
 

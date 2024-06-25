@@ -15,6 +15,8 @@ Usage:
 """
 
 import logging
+import logging.config
+import os
 from typing import List
 
 import torch
@@ -24,10 +26,11 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from transformers import BertModel, BertTokenizer
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
 
 class AttentionModel(torch.nn.Module, SearchClass):
@@ -71,10 +74,10 @@ class AttentionModel(torch.nn.Module, SearchClass):
         token_ids = self.tokenizer.convert_tokens_to_ids(self.filtered_tokens)
         tokens_tensor = torch.tensor([token_ids])
 
-        logging.debug("Original Sentence: %s", self.input_string)
-        logging.debug("Filtered and Lemmatized Sentence: %s", filtered_sentence)
-        logging.debug("Tokenized Sentence: %s", tokens_tensor)
-        logging.debug(self.filtered_tokens)
+        logger.debug("Original Sentence: %s", self.input_string)
+        logger.debug("Filtered and Lemmatized Sentence: %s", filtered_sentence)
+        logger.debug("Tokenized Sentence: %s", tokens_tensor)
+        logger.debug(self.filtered_tokens)
 
         return tokens_tensor
 

@@ -16,6 +16,8 @@ Usage:
 """
 
 import logging
+import logging.config
+import os
 from typing import List
 
 import nltk
@@ -25,10 +27,11 @@ import torch
 from base import SearchClass
 from transformers import AutoModel, AutoTokenizer
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
 
 def remove_duplicates(arr):

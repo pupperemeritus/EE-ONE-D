@@ -1,4 +1,6 @@
 import logging
+import logging.config
+import os
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple, Union
 
@@ -12,10 +14,10 @@ from pymilvus.model.dense import SentenceTransformerEmbeddingFunction
 from pymilvus.orm.collection import Collection, CollectionSchema, DataType, FieldSchema
 from transformers import AutoModel, AutoTokenizer
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
 logger = logging.Logger(__name__)
 
 

@@ -17,6 +17,8 @@ Usage:
 """
 
 import logging
+import logging.config
+import os
 from typing import List, Optional, Tuple, Union
 
 import torch
@@ -25,10 +27,11 @@ from base import SearchClass
 from models import QueryDBModel
 
 logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
 
 class SemanticSearch(SearchClass):
@@ -47,7 +50,6 @@ class SemanticSearch(SearchClass):
 
         """
         logger.debug("Initializing SemanticSearch class")
-
 
         self.model = QueryDBModel(model=model_name)
 

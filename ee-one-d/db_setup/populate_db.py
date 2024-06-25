@@ -1,6 +1,7 @@
 import asyncio
 import logging
-import multiprocessing
+import logging.config
+import os
 import string
 
 import nltk
@@ -16,16 +17,17 @@ from pymilvus import (
 )
 from pymilvus.model.dense import SentenceTransformerEmbeddingFunction
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
-# Increase this value based on your system's capabilities
 CHUNK_SIZE = 10000
 BATCH_SIZE = 512
 
 
-def encode_and_prepare_data():
+async def encode_and_prepare_data():
     # Connect to Milvus
     connections.connect(alias="default", host="localhost", port=19530)
 
@@ -47,15 +49,11 @@ def encode_and_prepare_data():
     # Process words
     processed_words = set()
     for word in words:
-        # Convert to lowercase
         word = word.lower()
-        # Remove punctuation
         word = word.translate(str.maketrans("", "", string.punctuation))
-        # Remove words shorter than 2 characters
         if len(word) > 1:
             processed_words.add(word)
 
-    # Convert set back to list
     processed_words = list(processed_words)
 
     logging.info(f"Original word count: {len(words)}")
@@ -79,7 +77,7 @@ def encode_and_prepare_data():
 
 async def bulk_insert_chunk(collection, chunk):
     df = pd.DataFrame(chunk)
-    collection.insert(df)
+    await asyncio.to_thread(collection.insert, df)
     logging.debug(f"Inserted chunk of size {len(chunk['id'])}")
 
 
@@ -97,9 +95,8 @@ async def main():
     # Connect to Milvus
     connections.connect(alias="default", host="localhost", port=19530)
 
-    # Use multiprocessing to process data
-    with multiprocessing.get_context("spawn").Pool(1) as pool:
-        data, vector_dim = pool.apply(encode_and_prepare_data)
+    # Process data
+    data, vector_dim = await encode_and_prepare_data()
 
     # Connect to Milvus client
     client = MilvusClient(host="localhost", db_name="eeoned", port=19530, timeout=10**5)
@@ -107,6 +104,7 @@ async def main():
     # Define collection name
     collection_name = "semantic_embeddings"
     db.using_database("eeoned")
+
     # Drop collection if exists and create new collection with ORM
     if client.has_collection(collection_name=collection_name):
         logging.debug("Dropping collection")
@@ -147,11 +145,9 @@ async def main():
     collection.load()
 
     print(f"Number of entities in collection: {collection.num_entities}")
-    # Verify data insertion
     # Disconnect from Milvus
     connections.disconnect("default")
 
 
 if __name__ == "__main__":
-    multiprocessing.set_start_method("spawn")
     asyncio.run(main())

@@ -1,11 +1,15 @@
 import logging
+import logging.config
+import os
 import sys
 
 from pymilvus import connections, db, utility
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+try:
+    logging.config.fileConfig(os.path.join(os.getcwd(),"ee-one-d","logging.conf"))
+except Exception as e:
+    logging.error("Cwd must be root of project directory")
+logger = logging.Logger(__name__)
 
 
 def drop_all_collections():
@@ -19,17 +23,17 @@ def drop_all_collections():
     collection_names = utility.list_collections()
 
     if not collection_names:
-        logging.info("No collections found in the 'default' database.")
+        logger.info("No collections found in the 'default' database.")
     else:
-        logging.info(f"Found {len(collection_names)} collections.")
+        logger.info(f"Found {len(collection_names)} collections.")
 
         # Drop each collection
         for name in collection_names:
             try:
                 utility.drop_collection(name)
-                logging.info(f"Dropped collection: {name}")
+                logger.info(f"Dropped collection: {name}")
             except Exception as e:
-                logging.error(f"Failed to drop collection {name}: {e}")
+                logger.error(f"Failed to drop collection {name}: {e}")
 
     # Disconnect from Milvus
     connections.disconnect("default")
@@ -37,4 +41,4 @@ def drop_all_collections():
 
 if __name__ == "__main__":
     drop_all_collections()
-    logging.info("Script execution completed.")
+    logger.info("Script execution completed.")
