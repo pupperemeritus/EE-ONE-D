@@ -22,7 +22,7 @@ class SearchPipeline:
         primary_arg_name: str,
         init_arg_dict: List[Dict],
         call_arg_dict: List[Dict],
-    ):
+    ) -> None:
 
         logger.debug(
             f"Initializing SearchPipeline class. \
@@ -39,7 +39,7 @@ class SearchPipeline:
         self.init_arg_dict = init_arg_dict
         self.call_arg_dict = call_arg_dict
 
-    def run(self):
+    def run(self) -> List:
         logger.debug("Running SearchPipeline")
         results = []
         while self.input_class_list and self.init_arg_dict and self.call_arg_dict:

@@ -126,7 +126,7 @@ def find_nearest_neighbors(
 
 
 class FuzzySearch(SearchClass):
-    def __init__(self, query: str, document: List[str]):
+    def __init__(self, query: str, document: List[str]) -> None:
         self.query = query
         self.document = document
 
@@ -135,7 +135,7 @@ class FuzzySearch(SearchClass):
         distance_threshold: int = 2,
         limit: int = 4,
         length_threshold: int = 3,
-    ):
+    ) -> List:
         result = []
         for sentence_index, sentence in enumerate(self.document):
 

@@ -18,14 +18,14 @@ Usage:
 import logging
 import logging.config
 import os
-from typing import List
+from typing import Any, List, Tuple
 
 import nltk
 import numpy as np
 import pandas as pd
 import torch
 from base import SearchClass
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModel, AutoTokenizer, BatchEncoding
 
 try:
     logging.config.fileConfig(os.path.join(os.getcwd(), "ee-one-d", "logging.conf"))
@@ -87,7 +87,7 @@ class TypographicalNeighbors(SearchClass):
         self.distance = distance
         self._retrieve_neighbors_by_word_distance()
 
-    def _tokenize_inputs(self):
+    def _tokenize_inputs(self) -> Tuple[BatchEncoding, Any]:
         """
         Tokenizes the input string using the tokenizer, generates the input representation using the model,
         and returns the tokenized inputs and the input representation.
@@ -101,7 +101,7 @@ class TypographicalNeighbors(SearchClass):
         )
         return tokenized_inputs, input_representation
 
-    def _retrieve_neighbors_by_word_distance(self):
+    def _retrieve_neighbors_by_word_distance(self) -> List[str]:
         """
         Retrieves the typographical neighbors of the input string by iterating through the words in the NLTK corpus
         and checking for words that have a metric distance of 1 from the input string.

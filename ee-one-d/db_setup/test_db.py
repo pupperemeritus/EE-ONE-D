@@ -3,6 +3,7 @@ import logging.config
 import os
 import sys
 import time
+from typing import Any
 
 from pymilvus import MilvusClient, connections, db, utility
 from pymilvus.model.dense import SentenceTransformerEmbeddingFunction
@@ -16,12 +17,12 @@ logger = logging.Logger(__name__)
 
 
 class Timer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.start_time = None
         self.end_time = None
         self.running = False
 
-    def start(self):
+    def start(self) -> None:
         if not self.running:
             self.start_time = time.time()
             self.running = True
@@ -29,19 +30,19 @@ class Timer:
         else:
             print("Timer is already running.")
 
-    def stop(self):
+    def stop(self) -> None:
         if self.running:
             self.end_time = time.time()
             self.running = False
         else:
             print("Timer is not running.")
 
-    def reset(self):
+    def reset(self) -> None:
         self.start_time = None
         self.end_time = None
         self.running = False
 
-    def elapsed(self):
+    def elapsed(self) -> float:
         if self.running:
             return time.time() - self.start_time
         elif self.start_time is not None and self.end_time is not None:
@@ -49,7 +50,7 @@ class Timer:
         else:
             return 0.0
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Elapsed time: {self.elapsed()} seconds"
 
 

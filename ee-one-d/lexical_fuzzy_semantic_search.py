@@ -51,9 +51,11 @@ class LFSS:
             self.class_list, query, "query", init_arg_dict, call_arg_dict
         )
 
-    def __call__(self):
+    def __call__(self, limit: int=10):
         logger.debug("Running pipeline")
-        return self.pipeline.run()
+        result = self.pipeline.run()
+        result.sort(key=lambda x: x['distance'])
+        return result[:limit]
 
 
 if __name__ == "__main__":
@@ -88,5 +90,5 @@ if __name__ == "__main__":
 
     for result in results:
         print(f"\nIn sentence: '{result['sentence']}'")
-        print(f"\nFound: '{result['word']}'\n(Distance: {result['distance']})")
+        print(f"\nFound: '{result['word']}'(Distance: {result['distance']})")
         print(f"\nContext: '{result['context']}'")

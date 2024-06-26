@@ -2,7 +2,7 @@ import logging
 import logging.config
 import os
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List
 
 import nltk
 import torch
@@ -36,7 +36,7 @@ class QueryDBModel(ModelQuery):
         db_name: str = "eeoned",
         db_collection_name: str = "semantic_embeddings",
         db_port=19530,
-    ):
+    ) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         connections.connect(alias=db_alias, host=db_host, port=db_port)
         self.client = MilvusClient()
@@ -57,7 +57,7 @@ class QueryDBModel(ModelQuery):
         )
         logger.debug(f"Initialized embedding function")
 
-    def query(self, query: str, limit: int = 10):
+    def query(self, query: str, limit: int = 10) -> Dict:
         encoded_query = self.embedding_func.encode_queries([query])
         results = self.collection.search(
             data=encoded_query,

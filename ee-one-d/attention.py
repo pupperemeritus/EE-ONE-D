@@ -34,7 +34,7 @@ logger = logging.Logger(__name__)
 
 
 class AttentionModel(torch.nn.Module, SearchClass):
-    def __init__(self, query: str, model_name: str = "bert-base-uncased"):
+    def __init__(self, query: str, model_name: str = "bert-base-uncased") -> None:
         """
         Initializes the AttentionModel with the input_string and an optional model_name.
 

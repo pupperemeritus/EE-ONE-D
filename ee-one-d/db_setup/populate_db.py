@@ -3,6 +3,7 @@ import logging
 import logging.config
 import os
 import string
+from typing import Any, Dict, Tuple
 
 import nltk
 import pandas as pd
@@ -27,7 +28,7 @@ CHUNK_SIZE = 10000
 BATCH_SIZE = 512
 
 
-async def encode_and_prepare_data():
+async def encode_and_prepare_data() -> Tuple[Dict[str, Any], int]:
     # Connect to Milvus
     connections.connect(alias="default", host="localhost", port=19530)
 
@@ -75,13 +76,13 @@ async def encode_and_prepare_data():
     return data, len(vectors[0])
 
 
-async def bulk_insert_chunk(collection, chunk):
+async def bulk_insert_chunk(collection: Collection, chunk: Dict) -> None:
     df = pd.DataFrame(chunk)
     await asyncio.to_thread(collection.insert, df)
     logging.debug(f"Inserted chunk of size {len(chunk['id'])}")
 
 
-async def bulk_insert_concurrent(collection, data):
+async def bulk_insert_concurrent(collection: Collection, data: Dict) -> None:
     chunk_size = CHUNK_SIZE
     tasks = []
     for i in range(0, len(data["id"]), chunk_size):
@@ -91,7 +92,7 @@ async def bulk_insert_concurrent(collection, data):
     await asyncio.gather(*tasks)
 
 
-async def main():
+async def main() -> None:
     # Connect to Milvus
     connections.connect(alias="default", host="localhost", port=19530)
 
